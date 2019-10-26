@@ -29,5 +29,8 @@ Theory of operation
 5. Upload to sql database and create online stats of where spots are. Could be live projected normal image?
 
 
+Blob References:
+http://nghiaho.com/uploads/code/opencv_connected_component/blob.cpp
+
   
   
