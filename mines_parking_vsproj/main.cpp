@@ -17,6 +17,8 @@
 #include <iostream>
 #include <opencv2/opencv.hpp>
 #include <opencv2/aruco.hpp>
+#include <opencv2/highgui/highgui.hpp>
+#include <opencv2/imgproc/imgproc.hpp>
 #include <windows.h>
 
 using namespace cv;
@@ -146,7 +148,7 @@ void getParkingSpotLines(string imageName) {
 		int waitKeyVal = cv::waitKey(33);
 		if (waitKeyVal == 27) { //escape, stop drawing lines
 			
-			cout << "TODO Erica save the csv below" << endl;
+			//TODO Erica save the csv below
 			for (int i = 0; i < mouseClicks.size(); i++) {
 				cout << mouseClicks.at(i).second.first << "," << mouseClicks.at(i).second.second << endl;
 			}
@@ -183,13 +185,83 @@ void getParkingSpotLines(string imageName) {
 
 		
 		cv::imshow("My Window", img);
+
 			
 	}
 }
 
+cv::Mat drawParkingSpotLines(string imageName, vector<vector<int>> parkingLineVec) {
+	string maskedWindowName = "maskedWindow";
+	//namedWindow(maskedWindowName,2);
+	cv::Mat imWithParkingLines, gray,thresholded;
+	imWithParkingLines = imread(imageName);
+	if (!imWithParkingLines.data)                              // Check for invalid input
+	{
+		cout << "Could not open or find the image" << std::endl;
+	}
+	namedWindow("Display windowX", WINDOW_AUTOSIZE);// Create a window for display.
+	imshow("Display windowX", imWithParkingLines);                   // Show our image inside it.
+
+	cvtColor(imWithParkingLines, gray, cv::COLOR_BGR2GRAY); //perform gray scale conversion
+	
+	const cv::Scalar colorOfParkingLines(0, 0,0);
+	
+
+	for (int i = 0; i < parkingLineVec.size(); i = i+2) {
+		cout << "Drawing Line "<< i/2 << endl;
+		cout << "\t" << parkingLineVec.at(i).at(0) << " " << parkingLineVec.at(i).at(1) << endl;
+		cout << "\t" << parkingLineVec.at(i+1).at(0) << " " << parkingLineVec.at(i+1).at(1) << endl;
+		cv::Point xyPair1(parkingLineVec.at(i).at(0), parkingLineVec.at(i).at(1));
+		cv::Point xyPair2(parkingLineVec.at(i+1).at(0), parkingLineVec.at(i+1).at(1));
+		cv::line(gray, xyPair1, xyPair2, colorOfParkingLines, 3);
+		
+	}
+	//threshold on black lines
+	cv::threshold(gray, thresholded, 1, 255, cv::THRESH_BINARY);
+
+		
+	imshow("Display windowX", thresholded);
+	cout << "Done Drawing" << endl;
+	cv::waitKey(0);
+	return gray;
+}
+
 int main(int argc, char** argv)
 {
-	getParkingSpotLines("parking1.png");
+	string sourceImage = "parking1.png";
+	getParkingSpotLines(sourceImage);	
+	
+	/* Example Data:
+	327,365
+	364,300
+	379,374
+	416,304
+	455,367
+	467,312
+	345,331
+	457,336
+	364,297
+	468,307
+	326,365
+	454,367
+	*/
+
+	vector<vector<int>> parkingLines{
+		{327,365},
+		{364,300},
+		{379,374 },
+		{416,304 },
+		{455,367},
+		{467,312 },
+		{345,331 },
+		{457,336 },
+		{364,297 },
+		{468,307 },
+		{326,365 },
+		{454,367 },
+	};
+
+	cv::Mat imWithParkingLines = drawParkingSpotLines(sourceImage, parkingLines);
 
 
 	//Process the parking spots. 
@@ -197,3 +269,5 @@ int main(int argc, char** argv)
 	return 0;
 
 }
+
+
