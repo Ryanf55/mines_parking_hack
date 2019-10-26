@@ -36,4 +36,5 @@ Blob References:
 
 Vehicle Tracking
 * https://www.behance.net/gallery/4057777/Vehicle-Detection-Tracking-and-Counting
+* Haar Classifier: https://www.geeksforgeeks.org/opencv-python-program-vehicle-detection-video-frame/
   
