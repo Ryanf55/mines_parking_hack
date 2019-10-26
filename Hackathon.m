@@ -30,6 +30,7 @@ I_changedCar = imshow(imread('overhead2.jpg'));
 saveas(gcf,'ov2_sized.jpg');
 
 %% 
+tic();
 spotLinesBinary = imread('ov_mask_sized.jpg');
 RGB =  imread('ov1_sized.jpg');
 [height, width, numberOfColorChannels] = size(spotLinesBinary);
@@ -46,8 +47,8 @@ disp('E')
 W = Idiff>0;  
 
 % creates structuring element, a disk of radius 1 and 0
-Sopen = strel('disk', 0);
-Sclose = strel('disk', 1);
+Sopen = strel('disk', 1);
+Sclose = strel('disk', 2);
 disp('C')
 
 %opening 
@@ -71,11 +72,12 @@ imshow(Q);
 
 carBlobs = regionprops(L, 'Area', 'BoundingBox', 'Centroid', 'Perimeter');
 hold on;
+toc()
 
 %%
 clf;
 clc;
-subplot(2,3,2)
+%subplot(2,3,2)
 imshow(Q);
 hold on;
 for i = 1:length(carBlobs)
@@ -83,7 +85,7 @@ for i = 1:length(carBlobs)
      myBlob = carBlobs(i);
     myBlobCentroid = myBlob.Centroid;
     if myBlob.Area < 100000
-        text(myBlobCentroid(1)-12,myBlobCentroid(2),sprintf('%d',i),'Color','b')
+        text(myBlobCentroid(1)-12,myBlobCentroid(2),sprintf('%d',i),'Color','k')
     end
 end
 
@@ -126,13 +128,10 @@ for i = 1:length(carBlobs)
         naiveDiff = sum(max(actualDiff));
         if  naiveDiff > 1000
             fprintf('Spot %d has changed state by %d\n',i,naiveDiff)
-            spotsChanged(i) = naiveDiff;
+            spotsChanged(i) = 1;
         end
         pause()
-        
-  
-        %imshow(maskedRGB);
-        %pause(10);
+
     end
 end
 
