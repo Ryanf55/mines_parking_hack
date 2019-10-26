@@ -23,11 +23,12 @@ using namespace cv;
 using namespace std;
 
 #include "opencv2/highgui/highgui.hpp"
+//#include "opencv2/imgproc/imgproc.hpp"
 
 std::vector<std::pair<int, std::pair<int, int>>> mouseClicks;
 
 
-Mat img;
+Mat img, detectedEdges;
 
 void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
@@ -53,7 +54,6 @@ void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 		desiredLineAction = undoLastClick;
 	}
 
-
 	if (isMouseClick) {
 		//mouse x,y
 		std::pair<int, int> position(x, y);
@@ -73,42 +73,61 @@ void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 		cvtColor(img, gray, cv::COLOR_BGR2GRAY); //perform gray scale conversion
 
 		//threshold the image
-		adaptiveThreshold(gray,
+		/*adaptiveThreshold(gray,
 			imageThresh, //output image matrix
 			255, // output value where condition met
 			cv::ADAPTIVE_THRESH_GAUSSIAN_C, // local neighborhood
 			cv::THRESH_BINARY_INV, // threshold_type - invert
 			5, // blockSize (any large number)
-			0); // a constant to subtract from mean
+			0); // a constant to subtract from mean*/
+
+		//cv::blur(imageThresh, detectedEdges, Size(5, 5));
+		//cv::imshow("Output Image", detectedEdges);
+
+		
 
 		//erode and dilate
-		cv::Mat ellipse_dilate = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
-		cv::Mat ellipse_erode = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
+		//cv::Mat ellipse_dilate = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(1, 1));
+		//cv::Mat ellipse_erode = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(2, 2));
 
 		// Opening
-		Mat opening, closing;
-		dilate(imageThresh, opening, ellipse_dilate);
-		erode(opening, closing, ellipse_erode);
+		//Mat opening, closing;
+		//dilate(imageThresh, opening, ellipse_dilate);
+		//erode(opening, closing, ellipse_erode);
 		//cv::morphologyEx(imageThresh, opening, cv::MORPH_OPEN, ellipse);
 
 		// Closing
 		//cv::morphologyEx(imageThresh, closing, cv::MORPH_CLOSE, ellipse);
 
-		std::vector<std::vector<cv::Point>> outputPoints;
-		std::vector<cv::Vec4i> hierarchy;
+		//std::vector<std::vector<cv::Point>> outputPoints;
+		//std::vector<cv::Vec4i> hierarchy;
 
-		cv::findContours(closing,// input image (is destroyed)
+		/*cv::findContours(closing,// input image (is destroyed)
 			outputPoints,// A std::vector<std::vector<cv::Point>> output vector of contours
 			hierarchy,// A cv::Vec4i in which to store the hierarchical representation
 			cv::RETR_CCOMP,// retrieve all contours
-			cv::CHAIN_APPROX_NONE);// all pixels of each contours
+			cv::CHAIN_APPROX_NONE);// all pixels of each contours*/
 
-		cv::imshow("Thresholded Image", opening);
-		
+		cv::Canny(gray, imageThresh, 50, 200, 3);
 
-		// iterate thru image andadd 1 to each 0 pixel
-		// > 0 white
-		// 1 blck
+		vector<Vec2f> lines;
+		HoughLines(imageThresh, lines, 1, CV_PI/180, 250, 0, 0);
+
+		for (size_t i = 0; i < lines.size(); i++)
+		{
+			float rho = lines[i][0], theta = lines[i][1];
+			Point pt1, pt2;
+			double a = cos(theta), b = sin(theta);
+			double x0 = a * rho, y0 = b * rho;
+			pt1.x = cvRound(x0 + 1000 * (-b));
+			pt1.y = cvRound(y0 + 1000 * (a));
+			pt2.x = cvRound(x0 - 1000 * (-b));
+			pt2.y = cvRound(y0 - 1000 * (a));
+			line(img, pt1, pt2, Scalar(0, 0, 255), 3, LINE_AA);
+		}
+		cv::imshow("image", imageThresh);
+		cv::imshow("Thresholded Image", img);
+	
 
 	}
 }
@@ -159,7 +178,6 @@ void getParkingSpotLines(string imageName) {
 			cout << "Draw line" << endl;
 		}
 
-
 		prevImg = img;
 		cv::imshow("My Window", img);
 			
@@ -168,7 +186,7 @@ void getParkingSpotLines(string imageName) {
 
 int main(int argc, char** argv)
 {
-	getParkingSpotLines("parking1.png");
+	getParkingSpotLines("Z:\\mines_parking_hack\\overhead1.jpg");
 
 
 	//Process the parking spots. 
