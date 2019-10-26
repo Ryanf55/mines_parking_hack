@@ -1,10 +1,6 @@
 // Main.cpp - Import images
 
 
-
-#include <iostream>
-
-
 // Run program: Ctrl + F5 or Debug > Start Without Debugging menu
 // Debug program: F5 or Debug > Start Debugging menu
 
@@ -31,7 +27,7 @@ using namespace std;
 std::vector<std::pair<int, std::pair<int, int>>> mouseClicks;
 
 
-
+Mat img;
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
@@ -68,12 +64,56 @@ void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 		for (int i = 0; i < mouseClicks.size(); i++){
 			cout << mouseClicks[i].second.first << "," << mouseClicks[i].second.second << endl;
 		}
+
+		//Convert image to grayscale
+		Mat gray, imageThresh;
+		cvtColor(img, gray, cv::COLOR_BGR2GRAY); //perform gray scale conversion
+
+		//threshold the image
+		adaptiveThreshold(gray,
+			imageThresh, //output image matrix
+			255, // output value where condition met
+			cv::ADAPTIVE_THRESH_GAUSSIAN_C, // local neighborhood
+			cv::THRESH_BINARY_INV, // threshold_type - invert
+			5, // blockSize (any large number)
+			0); // a constant to subtract from mean
+
+		//erode and dilate
+		cv::Mat ellipse_dilate = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
+		cv::Mat ellipse_erode = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
+
+		// Opening
+		Mat opening, closing;
+		dilate(imageThresh, opening, ellipse_dilate);
+		erode(opening, closing, ellipse_erode);
+		//cv::morphologyEx(imageThresh, opening, cv::MORPH_OPEN, ellipse);
+
+		// Closing
+		//cv::morphologyEx(imageThresh, closing, cv::MORPH_CLOSE, ellipse);
+
+		std::vector<std::vector<cv::Point>> outputPoints;
+		std::vector<cv::Vec4i> hierarchy;
+
+		cv::findContours(closing,// input image (is destroyed)
+			outputPoints,// A std::vector<std::vector<cv::Point>> output vector of contours
+			hierarchy,// A cv::Vec4i in which to store the hierarchical representation
+			cv::RETR_CCOMP,// retrieve all contours
+			cv::CHAIN_APPROX_NONE);// all pixels of each contours
+
+		cv::imshow("Thresholded Image", opening);
+		
+
+		// iterate thru image andadd 1 to each 0 pixel
+		// > 0 white
+		// 1 blck
+
 	}
 }
 
 void getParkingSpotLines() {
+	
 	// Read image from file 
-	Mat img = imread("parking1.png");
+	img = imread("parking1.png");
 
 	//if fail to read the image
 	if (img.empty())
@@ -95,6 +135,8 @@ void getParkingSpotLines() {
 		if (cv::waitKey(33) == 27) {
 			break;
 		}
+
+
 }
 
 int main(int argc, char** argv)
