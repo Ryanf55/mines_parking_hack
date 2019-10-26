@@ -1,4 +1,33 @@
 # mines_parking_hack
 
-http://cnrpark.it/
-https://towardsdatascience.com/find-where-to-park-in-real-time-using-opencv-and-tensorflow-4307a4c3da03
+* http://cnrpark.it/
+* opencv tensor parking implementation: https://towardsdatascience.com/find-where-to-park-in-real-time-using-opencv-and-tensorflow-4307a4c3da03
+* cascade Calssifier: https://docs.opencv.org/2.4/modules/objdetect/doc/cascade_classification.html
+* cascade python implementation with trained xml: https://www.geeksforgeeks.org/opencv-python-program-vehicle-detection-video-frame/
+*  
+
+Theory of operation
+1. Establish where spots are by drawing lines. Detect spots by any 4 corner closed polygon. Save this to a file that can be applied to any image along with the source image that can be transformed to the original coordinates
+
+  * spot1
+    * <corner1x,corner1y>
+    * <corner2x,corner2y>
+    * <corner3x,corner3y>
+    * <corner4x,corner4y>
+  * spot1
+    * <corner1x,corner1y>
+    * <corner2x,corner2y>
+    * <corner3x,corner3y>
+    * <corner4x,corner4y>
+    
+2. Any closed polygon will be a mask spot. Count the number of masks to get number of spots
+
+3. Compare two images by subtracing them and absolute valuing the difference. Any difference can be assumed a car leaves or enters. Compare the spot to close area adjacent to it to see if its a spot or not?
+
+4. Establish an output image of green/red depending if is occupied
+
+5. Upload to sql database and create online stats of where spots are. Could be live projected normal image?
+
+
+  
+  
