@@ -27,7 +27,7 @@ using namespace std;
 std::vector<std::pair<int, std::pair<int, int>>> mouseClicks;
 
 
-Mat img;
+
 
 void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
@@ -69,7 +69,7 @@ void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 		}
 
 		//Convert image to grayscale
-		Mat gray, imageThresh;
+		Mat gray, imageThresh,img = imread("parking1.png");
 		cvtColor(img, gray, cv::COLOR_BGR2GRAY); //perform gray scale conversion
 
 		//threshold the image
@@ -103,7 +103,7 @@ void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 			cv::RETR_CCOMP,// retrieve all contours
 			cv::CHAIN_APPROX_NONE);// all pixels of each contours
 
-		cv::imshow("Thresholded Image", opening);
+		//cv::imshow("Thresholded Image", opening);
 		
 
 		// iterate thru image andadd 1 to each 0 pixel
@@ -114,8 +114,10 @@ void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 }
 
 void getParkingSpotLines(string imageName) {
+
 	// Read image from file 
-	img = imread(imageName);
+
+	Mat img = imread(imageName);
 
 	//if fail to read the image
 	if (img.empty())
@@ -135,32 +137,51 @@ void getParkingSpotLines(string imageName) {
 
 	// Wait until user press escape key.
 	size_t numLinesDrawn = mouseClicks.size();
-	cv::Mat prevImg = img;
+	cv::Mat prevImg = img.clone();
 	const cv::Scalar colorOfParkingLines(0, 0, 0);
-	while (1) {
+	//drawing Loop
+	while (1) { 
 		
 
 		int waitKeyVal = cv::waitKey(33);
 		if (waitKeyVal == 27) { //escape, stop drawing lines
+			
+			cout << "TODO Erica save the csv below" << endl;
+			for (int i = 0; i < mouseClicks.size(); i++) {
+				cout << mouseClicks.at(i).second.first << "," << mouseClicks.at(i).second.second << endl;
+			}
 			break;
 		}
 
-		else if (waitKeyVal == 117) {//undo. Remove a point
+		//undo. Remove a point
+		else if (waitKeyVal == 117) {
 			if (numLinesDrawn) {
 				mouseClicks.pop_back();
+				cout << "Pop from " << numLinesDrawn << "to" << numLinesDrawn-1 << endl;
+				if (numLinesDrawn % 2 == 1) { //removed the start point. Undo the line.
+					prevImg.copyTo(img);
+					cout << "im reset" << endl;
+				}
+				numLinesDrawn = mouseClicks.size();
 			}
+			else {
+				cout << "no points to remove" << endl;	
+			}
+			
 		}
 
-		if (mouseClicks.size() > numLinesDrawn+1) { //2 new mouse click so draw a line
+		//2 new mouse click so draw a line
+		if (mouseClicks.size() > numLinesDrawn+1) { 
 			cv::Point xy_firstPoint(mouseClicks.at(mouseClicks.size() - 1).second.first, mouseClicks.at(mouseClicks.size() - 1).second.second);
 			cv::Point xy_SecondPoint(mouseClicks.at(mouseClicks.size() - 2).second.first, mouseClicks.at(mouseClicks.size() - 2).second.second);
-			cv::line(img, xy_firstPoint, xy_SecondPoint, colorOfParkingLines, 5);
+			img.copyTo(prevImg);
+			cv::line(img, xy_firstPoint, xy_SecondPoint, colorOfParkingLines, 3);
 			numLinesDrawn = mouseClicks.size();
-			cout << "Draw line" << endl;
+			cout << "Draw line. Prev is before the line" << endl;
 		}
 
 
-		prevImg = img;
+		
 		cv::imshow("My Window", img);
 			
 	}
