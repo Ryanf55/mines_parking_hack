@@ -29,5 +29,17 @@ Theory of operation
 5. Upload to sql database and create online stats of where spots are. Could be live projected normal image?
 
 
-  
+Blob References:
+* http://nghiaho.com/uploads/code/opencv_connected_component/blob.cpp
+* https://docs.opencv.org/2.4/doc/tutorials/imgproc/shapedescriptors/find_contours/find_contours.html
+* https://www.analyticsvidhya.com/blog/2019/03/opencv-functions-computer-vision-python/
+
+Vehicle Tracking
+* https://www.behance.net/gallery/4057777/Vehicle-Detection-Tracking-and-Counting
+* Haar Classifier: https://www.geeksforgeeks.org/opencv-python-program-vehicle-detection-video-frame/
+* Cascade Tutorial: https://docs.opencv.org/3.4/db/d28/tutorial_cascade_classifier.html
+
+CNN Detection
+* https://jivp-eurasipjournals.springeropen.com/articles/10.1186/s13640-018-0350-2/figures/1
+* Mask-RCNN https://medium.com/@ageitgey/snagging-parking-spaces-with-mask-r-cnn-and-python-955f2231c400
   
