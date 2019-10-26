@@ -19,6 +19,7 @@
 #include <opencv2/aruco.hpp>
 #include <opencv2/highgui/highgui.hpp>
 #include <opencv2/imgproc/imgproc.hpp>
+#include <fstream>      // std::ifstream, std::ofstream
 #include <windows.h>
 
 using namespace cv;
@@ -70,52 +71,14 @@ void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 			cout << mouseClicks[i].second.first << "," << mouseClicks[i].second.second << endl;
 		}
 
-		//Convert image to grayscale
-		Mat gray, imageThresh,img = imread("parking1.png");
-		cvtColor(img, gray, cv::COLOR_BGR2GRAY); //perform gray scale conversion
-
-		//threshold the image
-		adaptiveThreshold(gray,
-			imageThresh, //output image matrix
-			255, // output value where condition met
-			cv::ADAPTIVE_THRESH_GAUSSIAN_C, // local neighborhood
-			cv::THRESH_BINARY_INV, // threshold_type - invert
-			5, // blockSize (any large number)
-			0); // a constant to subtract from mean
-
-		//erode and dilate
-		cv::Mat ellipse_dilate = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(3, 3));
-		cv::Mat ellipse_erode = cv::getStructuringElement(cv::MORPH_ELLIPSE, cv::Size(4, 4));
-
-		// Opening
-		Mat opening, closing;
-		dilate(imageThresh, opening, ellipse_dilate);
-		erode(opening, closing, ellipse_erode);
-		//cv::morphologyEx(imageThresh, opening, cv::MORPH_OPEN, ellipse);
-
-		// Closing
-		//cv::morphologyEx(imageThresh, closing, cv::MORPH_CLOSE, ellipse);
-
-		std::vector<std::vector<cv::Point>> outputPoints;
-		std::vector<cv::Vec4i> hierarchy;
-
-		cv::findContours(closing,// input image (is destroyed)
-			outputPoints,// A std::vector<std::vector<cv::Point>> output vector of contours
-			hierarchy,// A cv::Vec4i in which to store the hierarchical representation
-			cv::RETR_CCOMP,// retrieve all contours
-			cv::CHAIN_APPROX_NONE);// all pixels of each contours
-
-		//cv::imshow("Thresholded Image", opening);
-		
-
-		// iterate thru image andadd 1 to each 0 pixel
-		// > 0 white
-		// 1 blck
 
 	}
 }
 
 void getParkingSpotLines(string imageName) {
+
+	//Creat the CSV export:
+	std::ofstream outfile("xy_points.csv", std::ofstream::binary);
 
 	// Read image from file 
 
@@ -125,6 +88,7 @@ void getParkingSpotLines(string imageName) {
 	if (img.empty())
 	{
 		cout << "Error loading the image" << endl;
+		return;
 	}
 
 	//Create a window
@@ -151,7 +115,9 @@ void getParkingSpotLines(string imageName) {
 			//TODO Erica save the csv below
 			for (int i = 0; i < mouseClicks.size(); i++) {
 				cout << mouseClicks.at(i).second.first << "," << mouseClicks.at(i).second.second << endl;
+				outfile << mouseClicks.at(i).second.first << "," << mouseClicks.at(i).second.second << endl;
 			}
+			outfile.close();
 			break;
 		}
 
@@ -198,6 +164,7 @@ cv::Mat drawParkingSpotLines(string imageName, vector<vector<int>> parkingLineVe
 	if (!imWithParkingLines.data)                              // Check for invalid input
 	{
 		cout << "Could not open or find the image" << std::endl;
+		return imWithParkingLines;
 	}
 	namedWindow("Display windowX", WINDOW_AUTOSIZE);// Create a window for display.
 	imshow("Display windowX", imWithParkingLines);                   // Show our image inside it.
@@ -228,8 +195,8 @@ cv::Mat drawParkingSpotLines(string imageName, vector<vector<int>> parkingLineVe
 
 int main(int argc, char** argv)
 {
-	string sourceImage = "parking1.png";
-	getParkingSpotLines(sourceImage);	
+	string sourceImageName = "..\\overhead1.jpg";
+	getParkingSpotLines(sourceImageName);
 	
 	/* Example Data:
 	327,365
@@ -261,7 +228,7 @@ int main(int argc, char** argv)
 		{454,367 },
 	};
 
-	cv::Mat imWithParkingLines = drawParkingSpotLines(sourceImage, parkingLines);
+	cv::Mat imWithParkingLines = drawParkingSpotLines(sourceImageName, parkingLines);
 
 
 	//Process the parking spots. 
