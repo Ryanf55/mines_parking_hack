@@ -14,7 +14,7 @@ Theory of operation
     * <corner2x,corner2y>
     * <corner3x,corner3y>
     * <corner4x,corner4y>
-  * spot1
+  * spot2
     * <corner1x,corner1y>
     * <corner2x,corner2y>
     * <corner3x,corner3y>
