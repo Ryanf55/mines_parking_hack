@@ -75,7 +75,20 @@ hold on;
 %%
 clf;
 clc;
+subplot(2,3,2)
 imshow(Q);
+hold on;
+for i = 1:length(carBlobs)
+    
+     myBlob = carBlobs(i);
+    myBlobCentroid = myBlob.Centroid;
+    if myBlob.Area < 100000
+        text(myBlobCentroid(1)-12,myBlobCentroid(2),sprintf('%d',i),'Color','b')
+    end
+end
+
+pause();
+    
 prev_img = imread('ov2_sized.jpg');
 
 %imshow(prev_img - RGB);
@@ -90,32 +103,40 @@ for i = 1:length(carBlobs)
     myBlobCentroid = myBlob.Centroid;
     if myBlob.Area < 100000
         %plot(myBlobCentroid(1),myBlobCentroid(2),'*k')
-        text(myBlobCentroid(1)-12,myBlobCentroid(2),sprintf('%d',i-1))
+        
         
         %parkingSpotMask = (L == i);
         %imshow(parkingSpotMask);
-       
-        maskedRGB_latest =RGB.* repmat(uint8((L == i)),1,1,3);
-        maskedRGB_previous =prev_img.* repmat(uint8((L == i)),1,1,3);
-        subplot(1,3,1);
+        mask_3_deep =  repmat(uint8((L == i)),1,1,3);
+        maskedRGB_latest =RGB.* mask_3_deep;
+        maskedRGB_previous =prev_img.* mask_3_deep;
+        subplot(2,3,4);
         imshow(maskedRGB_latest - maskedRGB_previous);
-        subplot(1,3,2);
+        text(myBlobCentroid(1)-12,myBlobCentroid(2),sprintf('%d',i),'Color','b')
+        subplot(2,3,5);
         imshow(maskedRGB_latest);
-        subplot(1,3,3);
+        subplot(2,3,6);
         imshow(maskedRGB_previous);
         drawnow;
 
-        naiveDiff = sum(sum(sum(maskedRGB_latest - maskedRGB_previous)));
-        if  naiveDiff > 500
+        firstDiff = imsubtract(rgb2gray(maskedRGB_latest),rgb2gray(maskedRGB_previous));
+        secondDiff = imsubtract(rgb2gray(maskedRGB_previous),rgb2gray(maskedRGB_latest));
+        actualDiff = max(firstDiff,secondDiff);
+        
+        naiveDiff = sum(max(actualDiff));
+        if  naiveDiff > 1000
             fprintf('Spot %d has changed state by %d\n',i,naiveDiff)
             spotsChanged(i) = naiveDiff;
         end
+        pause()
         
   
         %imshow(maskedRGB);
         %pause(10);
     end
 end
+
+
 
 
 
