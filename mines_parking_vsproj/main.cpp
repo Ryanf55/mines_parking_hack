@@ -33,47 +33,53 @@ std::vector<std::pair<int, std::pair<int, int>>> mouseClicks;
 
 
 
-void CallBackFunc(int event, int x, int y, int flags, void* userdata)
+void MouseCallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
 	bool isMouseClick = false;
+	enum LineAction {addFirstpoint , addSecondPoint,undoLastClick };
+	LineAction desiredLineAction;
 	if (event == EVENT_LBUTTONDOWN)
 	{
 		//cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
 		isMouseClick = true;
+		desiredLineAction = addFirstpoint;
 	}
 	else if (event == EVENT_RBUTTONDOWN)
 	{
 		//cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
 		isMouseClick = true;
+		desiredLineAction = addSecondPoint;
 	}
 	else if (event == EVENT_MBUTTONDOWN)
 	{
 		//cout << "Middle button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
 		isMouseClick = true;
+		desiredLineAction = undoLastClick;
 	}
-	else if (event == EVENT_MOUSEMOVE)
-	{
-		//cout << "Mouse move over the window - position (" << x << ", " << y << ")" << endl;
 
-	}
 
 	if (isMouseClick) {
 		//mouse x,y
 		std::pair<int, int> position(x, y);
 		//add the event type
 		std::pair< int, std::pair<int, int >> eventAndPosition(event, position);
+
+		//if left click, add a point.
 		//push back the mouse click into mouse_clicks
 		mouseClicks.push_back(eventAndPosition);
 
+		/*
 		for (int i = 0; i < mouseClicks.size(); i++){
 			cout << mouseClicks[i].second.first << "," << mouseClicks[i].second.second << endl;
 		}
+		*/
 	}
 }
 
-void getParkingSpotLines() {
+
+void getParkingSpotLines(string imageName) {
 	// Read image from file 
-	Mat img = imread("parking1.png");
+	Mat img = imread(imageName);
 
 	//if fail to read the image
 	if (img.empty())
@@ -85,21 +91,47 @@ void getParkingSpotLines() {
 	namedWindow("My Window", 1);
 
 	//set the callback function for any mouse event
-	cv::setMouseCallback("My Window", CallBackFunc, NULL);
+	cv::setMouseCallback("My Window", MouseCallBackFunc, NULL);
+	
 
 	//show the image
 	cv::imshow("My Window", img);
 
 	// Wait until user press escape key.
-	while (1)
-		if (cv::waitKey(33) == 27) {
+	size_t numLinesDrawn = mouseClicks.size();
+	cv::Mat prevImg = img;
+	const cv::Scalar colorOfParkingLines(0, 0, 0);
+	while (1) {
+		
+
+		int waitKeyVal = cv::waitKey(33);
+		if (waitKeyVal == 27) { //escape, stop drawing lines
 			break;
 		}
+		else if (waitKeyVal == 117) {//undo. Remove a point
+			if (numLinesDrawn) {
+				mouseClicks.pop_back();
+			}
+		}
+
+		if (mouseClicks.size() > numLinesDrawn+1) { //2 new mouse click so draw a line
+			cv::Point xy_firstPoint(mouseClicks.at(mouseClicks.size() - 1).second.first, mouseClicks.at(mouseClicks.size() - 1).second.second);
+			cv::Point xy_SecondPoint(mouseClicks.at(mouseClicks.size() - 2).second.first, mouseClicks.at(mouseClicks.size() - 2).second.second);
+			cv::line(img, xy_firstPoint, xy_SecondPoint, colorOfParkingLines, 5);
+			numLinesDrawn = mouseClicks.size();
+			cout << "Draw line" << endl;
+		}
+
+
+		prevImg = img;
+		cv::imshow("My Window", img);
+			
+	}
 }
 
 int main(int argc, char** argv)
 {
-	getParkingSpotLines();
+	getParkingSpotLines("overhead1.jpg");
 
 
 	//Process the parking spots. 
