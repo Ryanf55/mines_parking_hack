@@ -40,5 +40,6 @@ Vehicle Tracking
 * Cascade Tutorial: https://docs.opencv.org/3.4/db/d28/tutorial_cascade_classifier.html
 
 CNN Detection
-https://jivp-eurasipjournals.springeropen.com/articles/10.1186/s13640-018-0350-2/figures/1
+* https://jivp-eurasipjournals.springeropen.com/articles/10.1186/s13640-018-0350-2/figures/1
+* Mask-RCNN https://medium.com/@ageitgey/snagging-parking-spaces-with-mask-r-cnn-and-python-955f2231c400
   
