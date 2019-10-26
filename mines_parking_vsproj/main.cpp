@@ -28,35 +28,50 @@ using namespace std;
 
 #include "opencv2/highgui/highgui.hpp"
 
-std::vector<std::pair<int, int>> mouse_clicks;
+std::vector<std::pair<int, std::pair<int, int>>> mouseClicks;
 
-std::enum
 
 
 
 void CallBackFunc(int event, int x, int y, int flags, void* userdata)
 {
+	bool isMouseClick = false;
 	if (event == EVENT_LBUTTONDOWN)
 	{
-		cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+		//cout << "Left button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+		isMouseClick = true;
 	}
 	else if (event == EVENT_RBUTTONDOWN)
 	{
-		cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+		//cout << "Right button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+		isMouseClick = true;
 	}
 	else if (event == EVENT_MBUTTONDOWN)
 	{
-		cout << "Middle button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+		//cout << "Middle button of the mouse is clicked - position (" << x << ", " << y << ")" << endl;
+		isMouseClick = true;
 	}
 	else if (event == EVENT_MOUSEMOVE)
 	{
 		//cout << "Mouse move over the window - position (" << x << ", " << y << ")" << endl;
 
 	}
+
+	if (isMouseClick) {
+		//mouse x,y
+		std::pair<int, int> position(x, y);
+		//add the event type
+		std::pair< int, std::pair<int, int >> eventAndPosition(event, position);
+		//push back the mouse click into mouse_clicks
+		mouseClicks.push_back(eventAndPosition);
+
+		for (int i = 0; i < mouseClicks.size(); i++){
+			cout << mouseClicks[i].second.first << "," << mouseClicks[i].second.second << endl;
+		}
+	}
 }
 
-int main(int argc, char** argv)
-{
+void getParkingSpotLines() {
 	// Read image from file 
 	Mat img = imread("parking1.png");
 
@@ -64,7 +79,6 @@ int main(int argc, char** argv)
 	if (img.empty())
 	{
 		cout << "Error loading the image" << endl;
-		return -1;
 	}
 
 	//Create a window
@@ -76,8 +90,19 @@ int main(int argc, char** argv)
 	//show the image
 	cv::imshow("My Window", img);
 
-	// Wait until user press some key
-	cv::waitKey(0);
+	// Wait until user press escape key.
+	while (1)
+		if (cv::waitKey(33) == 27) {
+			break;
+		}
+}
+
+int main(int argc, char** argv)
+{
+	getParkingSpotLines();
+
+
+	//Process the parking spots. 
 
 	return 0;
 
