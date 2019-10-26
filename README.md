@@ -30,7 +30,7 @@ Theory of operation
 
 
 Blob References:
-http://nghiaho.com/uploads/code/opencv_connected_component/blob.cpp
-
+* http://nghiaho.com/uploads/code/opencv_connected_component/blob.cpp
+* https://docs.opencv.org/2.4/doc/tutorials/imgproc/shapedescriptors/find_contours/find_contours.html
   
   
